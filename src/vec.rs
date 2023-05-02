@@ -1,6 +1,8 @@
 use std::fmt::{self, Display};
 use std::io;
-use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign};
+use std::ops::{
+    Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
+};
 
 #[derive(Clone, Copy)]
 pub struct Vec3 {
@@ -95,6 +97,15 @@ impl Add for Vec3 {
     fn add(self, other: Vec3) -> Vec3 {
         Vec3 {
             e: [self[0] + other[0], self[1] + other[1], self[2] + other[2]],
+        }
+    }
+}
+
+impl Neg for Vec3 {
+    type Output = Vec3;
+    fn neg(self) -> Self::Output {
+        Vec3 {
+            e: [-self[0], -self[1], -self[2]],
         }
     }
 }

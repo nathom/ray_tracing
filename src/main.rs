@@ -1,17 +1,22 @@
+mod hittable;
+mod hittable_list;
 mod ray;
+mod sphere;
 mod vec;
+use hittable::Hittable;
 use ray::Ray;
 use std::io::{stderr, stdout, Write};
 use vec::{Color, Point3, Vec3};
 
-fn ray_color(r: &Ray) -> Color {
-    let t = hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.5, r);
-    if t > 0.0 {
-        let N = (r.at(t) - Vec3::new(0.0, 0.0, -1.0)).unit_vector();
-        return 0.5 * Color::new(N.x() + 1.0, N.y() + 1.0, N.z() + 1.0);
+fn ray_color(r: &Ray, world: Box<dyn Hittable>) -> Color {
+    let (hit, rec) = world.hit(r, 0.0, f64::INFINITY);
+    if hit {
+        return 0.5 * (rec.normal() + Color::new(1.0, 1.0, 1.0));
     }
-    let unit_direction = r.direction().unit_vector();
-    let t = 0.5 * (unit_direction.y() + 1.0);
+
+    let unit_dir = r.direction().unit_vector();
+    let t = 0.5 * (unit_dir.y() + 1.0);
+
     (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
 }
 
@@ -65,7 +70,7 @@ fn main() {
                 lower_left_corner + u * horizontal + v * vertical - origin,
             );
             let pixel_color = ray_color(&r);
-            pixel_color.write_color(&mut out);
+            pixel_color.write_color(&mut out).unwrap();
         }
     }
     eprintln!("\nDone.");
