@@ -4,19 +4,23 @@ use std::ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
 };
 
+/// Vector of 3 doubles
 #[derive(Clone, Copy)]
 pub struct Vec3 {
     e: [f64; 3],
 }
 
+// Aliases for Vec3
 pub type Point3 = Vec3;
 pub type Color = Vec3;
 
 impl Vec3 {
+    /// Constructor
     pub fn new(e0: f64, e1: f64, e2: f64) -> Vec3 {
         Vec3 { e: [e0, e1, e2] }
     }
 
+    /// Accessors
     pub fn x(self) -> f64 {
         self[0]
     }
@@ -29,6 +33,7 @@ impl Vec3 {
         self[2]
     }
 
+    /// Basic operations
     pub fn dot(self, other: Vec3) -> f64 {
         self[0] * other[0] + self[1] * other[1] + self[2] * other[2]
     }
@@ -77,6 +82,7 @@ impl Display for Vec3 {
     }
 }
 
+// Here we implement overrides for builtin operators
 impl Index<usize> for Vec3 {
     type Output = f64;
 
@@ -146,6 +152,7 @@ impl Mul<f64> for Vec3 {
     }
 }
 
+// *=
 impl MulAssign<f64> for Vec3 {
     fn mul_assign(&mut self, other: f64) -> () {
         *self = Vec3 {
@@ -174,6 +181,7 @@ impl Div<f64> for Vec3 {
     }
 }
 
+// /=
 impl DivAssign<f64> for Vec3 {
     fn div_assign(&mut self, other: f64) -> () {
         *self = Vec3 {

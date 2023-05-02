@@ -8,18 +8,23 @@ use ray::Ray;
 use std::io::{stderr, stdout, Write};
 use vec::{Color, Point3, Vec3};
 
-fn ray_color(r: &Ray, world: Box<dyn Hittable>) -> Color {
+// Main drawing function
+// Given a fixed camera and object, calculate the color that should be displayed for a ray
+fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
     let (hit, rec) = world.hit(r, 0.0, f64::INFINITY);
     if hit {
+        // visualize normal vectors to the surface
         return 0.5 * (rec.normal() + Color::new(1.0, 1.0, 1.0));
     }
 
+    // otherwise, draw LERPed gradient as background
     let unit_dir = r.direction().unit_vector();
     let t = 0.5 * (unit_dir.y() + 1.0);
 
     (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
 }
 
+// outdated, move to hittable
 fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     let oc = r.origin() - *center;
     let a = r.direction().length_squared();
