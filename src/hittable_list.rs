@@ -29,20 +29,18 @@ impl Hittable for HittableList {
     // we do this by starting with a maximum upper bound for t (t_max)
     // and lowering it as we iterate through the list so we only end up
     // with the frontmost item in the hitrecord
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> (bool, HitRecord) {
-        let mut rec = HitRecord::new();
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        let mut rec: Option<HitRecord> = None;
         let mut hit_anything = false;
         let mut closest_so_far = t_max;
 
         for object in self.objects.iter() {
-            let (got_hit, temp_rec) = object.hit(r, t_min, closest_so_far);
-            if got_hit {
-                hit_anything = true;
-                closest_so_far = temp_rec.t;
-                rec = temp_rec;
+            if let Some(r) = object.hit(r, t_min, closest_so_far) {
+                closest_so_far = r.t;
+                rec = Some(r);
             }
         }
 
-        (hit_anything, rec)
+        rec
     }
 }

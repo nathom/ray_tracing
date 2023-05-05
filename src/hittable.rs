@@ -46,5 +46,5 @@ impl HitRecord {
 pub trait Hittable {
     // Return (did the ray hit the surface, details of hit or garbage if it didnt hit)
     // change to Option<HitRecord>?
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> (bool, HitRecord);
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }

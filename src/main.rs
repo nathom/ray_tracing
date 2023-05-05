@@ -13,8 +13,7 @@ use vec::{Color, Point3, Vec3};
 // Main drawing function
 // Given a fixed camera and object, calculate the color that should be displayed for a ray
 fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
-    let (hit, rec) = world.hit(r, 0.0, f64::INFINITY);
-    if hit {
+    if let Some(rec) = world.hit(r, 0.0, f64::INFINITY) {
         // visualize normal vectors to the surface
         return 0.5 * (rec.normal() + Color::new(1.0, 1.0, 1.0));
     }
