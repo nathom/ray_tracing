@@ -4,7 +4,9 @@ mod ray;
 mod sphere;
 mod vec;
 use hittable::Hittable;
+use hittable_list::HittableList;
 use ray::Ray;
+use sphere::Sphere;
 use std::io::{stderr, stdout, Write};
 use vec::{Color, Point3, Vec3};
 
@@ -24,26 +26,17 @@ fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
     (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
 }
 
-// outdated, move to hittable
-fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
-    let oc = r.origin() - *center;
-    let a = r.direction().length_squared();
-    let half_b = oc.dot(r.direction());
-    let c = oc.length_squared() - radius * radius;
-    let disc = half_b * half_b - a * c;
-
-    if disc < 0.0 {
-        -1.0
-    } else {
-        (-half_b - disc.sqrt()) / a
-    }
-}
-
 fn main() {
     // image
     let aspect_ratio: f64 = 16.0 / 9.0;
     let image_width: u32 = 400;
     let image_height: u32 = (image_width as f64 / aspect_ratio) as u32;
+
+    // world
+
+    let mut world = HittableList::new();
+    world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+    world.add(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
     // camera
 
@@ -74,7 +67,7 @@ fn main() {
                 origin,
                 lower_left_corner + u * horizontal + v * vertical - origin,
             );
-            let pixel_color = ray_color(&r);
+            let pixel_color = ray_color(&r, &world);
             pixel_color.write_color(&mut out).unwrap();
         }
     }
