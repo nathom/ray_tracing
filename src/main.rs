@@ -1,10 +1,14 @@
+mod camera;
+
 mod hittable;
 mod hittable_list;
 mod ray;
 mod sphere;
 mod vec;
+use camera::Camera;
 use hittable::Hittable;
 use hittable_list::HittableList;
+use rand::prelude::*;
 use ray::Ray;
 use sphere::Sphere;
 use std::io::{stderr, stdout, Write};
@@ -30,6 +34,7 @@ fn main() {
     let aspect_ratio: f64 = 16.0 / 9.0;
     let image_width: u32 = 400;
     let image_height: u32 = (image_width as f64 / aspect_ratio) as u32;
+    let samples_per_pixel = 100;
 
     // world
 
@@ -39,15 +44,7 @@ fn main() {
 
     // camera
 
-    let viewport_height = 2.0;
-    let viewport_width = aspect_ratio * viewport_height;
-    let focal_length = 1.0;
-
-    let origin = Point3::new(0.0, 0.0, 0.0);
-    let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, viewport_height, 0.0);
-    let lower_left_corner =
-        origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
+    let camera = Camera::new();
 
     println!("P3");
     println!("{} {}", image_width, image_height);
@@ -55,19 +52,31 @@ fn main() {
 
     let mut err = stderr();
     let mut out = stdout();
+    // for random numbers
+    let mut rng = rand::thread_rng();
     for j in (0..image_height).rev() {
         eprint!("\rScanlines remaining: {:3}", j);
         err.flush().unwrap();
 
         for i in 0..image_width {
-            let u = (i as f64) / ((image_width - 1) as f64);
-            let v = (j as f64) / ((image_height - 1) as f64);
-            let r = Ray::new(
-                origin,
-                lower_left_corner + u * horizontal + v * vertical - origin,
-            );
-            let pixel_color = ray_color(&r, &world);
-            pixel_color.write_color(&mut out).unwrap();
+            let mut pixel_color = Color::zero();
+            for _ in 0..samples_per_pixel {
+                // take random samples of the (i,j) pixel in the range ([i, i+1), [j, j+1))
+                let r1: f64 = rng.gen();
+                let r2: f64 = rng.gen();
+
+                // get ray to render
+                let u = (i as f64 + r1) / (image_width as f64 - 1.0);
+                let v = (j as f64 + r2) / (image_height as f64 - 1.0);
+                let r = camera.get_ray(u, v);
+
+                // accumulate color, to be descaled by writer
+                pixel_color += ray_color(&r, &world);
+            }
+            // descale, write pixel
+            pixel_color
+                .write_color_descaled(&mut out, samples_per_pixel)
+                .unwrap();
         }
     }
     eprintln!("\nDone.");

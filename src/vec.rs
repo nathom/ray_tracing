@@ -16,8 +16,12 @@ pub type Color = Vec3;
 
 impl Vec3 {
     /// Constructor
-    pub fn new(e0: f64, e1: f64, e2: f64) -> Vec3 {
+    pub const fn new(e0: f64, e1: f64, e2: f64) -> Vec3 {
         Vec3 { e: [e0, e1, e2] }
+    }
+
+    pub const fn zero() -> Vec3 {
+        Vec3 { e: [0.0, 0.0, 0.0] }
     }
 
     /// Accessors
@@ -65,14 +69,34 @@ impl Color {
     pub fn format_color(self) -> String {
         format!(
             "{} {} {}",
-            (255.999 * self[0]) as u64,
-            (255.999 * self[1]) as u64,
-            (255.999 * self[2]) as u64,
+            (255.999 * Self::clamp(self[0], 0.0, 0.999)) as u64,
+            (255.999 * Self::clamp(self[1], 0.0, 0.999)) as u64,
+            (255.999 * Self::clamp(self[2], 0.0, 0.999)) as u64,
         )
     }
 
-    pub fn write_color(self, out: &mut dyn io::Write) -> io::Result<()> {
-        write!(out, "{}\n", self.format_color())
+    // We use this to keep the output color in range
+    fn clamp(x: f64, min: f64, max: f64) -> f64 {
+        if x < min {
+            min
+        } else if x > max {
+            max
+        } else {
+            x
+        }
+    }
+
+    pub fn write_color_descaled(
+        self,
+        out: &mut dyn io::Write,
+        samples_per_pixel: u32,
+    ) -> io::Result<()> {
+        // since each random sample is added to the finally rendered pixel
+        // `samples_per_pixel` times, we have to scale it down to keep
+        // the final value in range
+        let scaled_color = self / samples_per_pixel as f64;
+
+        write!(out, "{}\n", scaled_color.format_color())
     }
 }
 

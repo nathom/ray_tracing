@@ -15,7 +15,8 @@ impl HittableList {
         Self { objects: vec![] }
     }
 
-    pub fn clear(&mut self) {
+    // underscored to remove warning
+    pub fn _clear(&mut self) {
         self.objects.clear()
     }
 
@@ -31,7 +32,6 @@ impl Hittable for HittableList {
     // with the frontmost item in the hitrecord
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut rec: Option<HitRecord> = None;
-        let mut hit_anything = false;
         let mut closest_so_far = t_max;
 
         for object in self.objects.iter() {
